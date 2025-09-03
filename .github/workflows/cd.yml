@@ -1,0 +1,100 @@
+name: CD - Continuous Deployment
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  workflow_run:
+    workflows: ["CI - Continuous Integration"]
+    types:
+      - completed
+
+jobs:
+  deploy-staging:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion == 'success'
+    environment: staging
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Download build artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: projeto-autenticador-build
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        run-id: ${{ github.event.workflow_run.id }}
+        
+    - name: Extract build
+      run: tar -xzf projeto-autenticador-build.tar.gz
+      
+    - name: Deploy to staging (simulation)
+      run: |
+        echo "🚀 Deploying to staging environment..."
+        echo "📦 Build extracted successfully"
+        echo "🔧 Environment: staging"
+        echo "📝 Commit: ${{ github.sha }}"
+        echo "✅ Deployment to staging completed!"
+        
+        # In a real scenario, this would deploy to your staging environment
+        # Examples:
+        # - Deploy to Heroku staging
+        # - Deploy to AWS/Azure staging slot
+        # - Deploy to Docker container registry
+        # - Update Kubernetes staging deployment
+
+  deploy-production:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') && github.event.workflow_run.conclusion == 'success'
+    environment: production
+    needs: [deploy-staging]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Download build artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: projeto-autenticador-build
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        repository: ${{ github.repository }}
+        run-id: ${{ github.event.workflow_run.id }}
+        
+    - name: Extract build
+      run: tar -xzf projeto-autenticador-build.tar.gz
+      
+    - name: Deploy to production (simulation)
+      run: |
+        echo "🚀 Deploying to production environment..."
+        echo "📦 Build extracted successfully"
+        echo "🔧 Environment: production"
+        echo "🏷️  Tag: ${{ github.ref_name }}"
+        echo "📝 Commit: ${{ github.sha }}"
+        echo "✅ Deployment to production completed!"
+        
+        # In a real scenario, this would deploy to your production environment
+        # Examples:
+        # - Deploy to Heroku production
+        # - Deploy to AWS/Azure production
+        # - Deploy to Docker container registry with production tag
+        # - Update Kubernetes production deployment
+        # - Notify team via Slack/Discord
+
+  # Example Heroku deployment (commented out - requires Heroku setup)
+  # deploy-heroku:
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main' && github.event.workflow_run.conclusion == 'success'
+  #   
+  #   steps:
+  #   - name: Checkout repository
+  #     uses: actions/checkout@v4
+  #     
+  #   - name: Deploy to Heroku
+  #     uses: akhileshns/heroku-deploy@v3.12.14
+  #     with:
+  #       heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+  #       heroku_app_name: "your-app-name"
+  #       heroku_email: "your-email@example.com"
