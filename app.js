@@ -23,6 +23,15 @@ app.get('/', (req, res) => {
   `);
 });
 
+// Health check endpoint for CI/CD and monitoring
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    version: require('./package.json').version
+  });
+});
+
 // Rota para configurar o 2FA
 app.get('/setup', (req, res) => {
   // Gerar segredo temporário

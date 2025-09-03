@@ -74,7 +74,67 @@ projeto-autenticador/
 - [ ] Adicionar validação de entrada
 - [ ] Melhorar interface do usuário
 - [ ] Implementar múltiplos usuários
-- [ ] Adicionar testes automatizados
+- [x] Adicionar testes automatizados
+- [x] Implementar CI/CD com GitHub Actions
+- [x] Adicionar linting com ESLint
+- [x] Configurar Docker para containerização
+
+## CI/CD Pipeline
+
+Este projeto possui um pipeline completo de CI/CD implementado com GitHub Actions:
+
+### Continuous Integration (CI)
+
+O workflow de CI (`/.github/workflows/ci.yml`) é executado em:
+- Push para branches `main` e `develop`
+- Pull requests para `main` e `develop`
+
+**Etapas do CI:**
+1. **Instalação de dependências** com `npm ci`
+2. **Auditoria de segurança** com `npm audit`
+3. **Linting** com ESLint
+4. **Testes automatizados** com Jest e cobertura
+5. **Upload de cobertura** para Codecov
+6. **Teste de build** e inicialização da aplicação
+7. **Criação de artefatos** para deployment
+
+### Continuous Deployment (CD)
+
+O workflow de CD (`/.github/workflows/cd.yml`) inclui:
+- **Deploy para staging** - automaticamente após CI bem-sucedido na branch `main`
+- **Deploy para produção** - acionado por tags (ex: `v1.0.0`)
+
+### Containerização
+
+A aplicação pode ser containerizada com Docker:
+
+```bash
+# Build da imagem
+docker build -t projeto-autenticador .
+
+# Executar container
+docker run -p 3000:3000 projeto-autenticador
+```
+
+### Comandos de Desenvolvimento
+
+```bash
+# Executar testes
+npm test
+npm run test:watch
+npm run test:coverage
+
+# Linting
+npm run lint
+npm run lint:fix
+
+# Auditoria de segurança
+npm run audit
+npm run audit:fix
+
+# Pipeline completo (CI local)
+npm run ci
+```
 
 ## Contribuição
 
